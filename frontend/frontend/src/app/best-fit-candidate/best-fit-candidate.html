@@ -1,0 +1,118 @@
+<!-- <app-navbar></app-navbar>
+
+  <div class="container">
+    <h2>Best Fit Candidate</h2>
+  
+    <div class="form-controls">
+      <label for="jobSelect">Select Job:</label>
+      <select id="jobSelect" [(ngModel)]="selectedJobId" required>
+        <option value="">-- Select job --</option>
+        <option *ngFor="let j of jobs" [value]="j._id">{{ j.title }}</option>
+      </select>
+  
+      <label for="topN">Number of Candidates:</label>
+      <input
+        id="topN"
+        type="number"
+        [(ngModel)]="topN"
+        min="1"
+        placeholder="e.g. 5"
+      />
+  
+      <button (click)="fetchTop()">Show Top {{ topN || 0 }} Candidates</button>
+    </div>
+  
+    <div *ngIf="candidates?.length" style="margin-top:16px;">
+      <h4>Top candidates for selected job</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Experience</th>
+            <th>Skills</th>
+            <th>Relevance Score</th>
+            <th>Comments</th>
+            <th>Resume</th>
+            <th>Export Report</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of candidates">
+            <td>{{ c.candidateName }}</td>
+            <td>{{ c.experience || 'N/A' }}</td>
+            <td>{{ getSkillsAsString(c) }}</td>
+            <td>{{ c.relevanceScore || c.relevance || 'N/A' }}</td>
+            <td>{{ c.comments }}</td>
+            <td>
+              <a [href]="c.resumeUrl || c.resumeLink" target="_blank" rel="noopener noreferrer">Open</a>
+            </td>
+            <td>
+              <button (click)="exportReport(c.resumeId)">Export PDF</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div> -->
+
+
+
+<app-navbar></app-navbar>
+
+<div class="container">
+  <h2>Best Fit Candidate</h2>
+
+  <div class="form-controls">
+    <label for="jobSelect">Select Job:</label>
+    <select id="jobSelect" [(ngModel)]="selectedJobId" required>
+      <option value="">-- Select job --</option>
+      <option *ngFor="let j of jobs" [value]="j._id">{{ j.title }}</option>
+    </select>
+
+    <label for="topN">Number of Candidates:</label>
+    <input id="topN" type="number" [(ngModel)]="topN" min="1" placeholder="e.g. 5" />
+
+    <button (click)="fetchTop()" [disabled]="loading">
+      {{ loading ? 'Loading...' : 'Show Top ' + (topN || 0) + ' Candidates' }}
+    </button>
+  </div>
+
+  <div *ngIf="loading" style="margin-top: 16px; font-weight: bold; color: #007bff;">
+    Analyzing resumes, please wait...
+  </div>
+
+  <div *ngIf="!loading && candidates?.length" style="margin-top:16px;">
+    <h4>Top candidates for selected job</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Candidate</th>
+          <th>Experience</th>
+          <th>Skills</th>
+          <th>Relevance Score</th>
+          <th>Comments</th>
+          <th>Resume</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of candidates">
+          <td>{{ c.candidateName }}</td>
+          <td>{{ c.experience || 'N/A' }}</td>
+          <td>{{ getSkillsAsString(c) }}</td>
+          <td>{{ c.relevanceScore || c.relevance || 'N/A' }}</td>
+          <td>{{ c.comments }}</td>
+          <td>
+            <a [href]="c.resumeUrl || c.resumeLink" target="_blank" rel="noopener noreferrer">Open</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 16px; text-align: right;">
+      <button (click)="exportAllReport()" [disabled]="!candidates.length || loading">
+        Export All to PDF
+      </button>
+    </div>
+    
+  </div>
+</div>

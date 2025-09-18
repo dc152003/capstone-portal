@@ -1,0 +1,56 @@
+<div class="signup-container">
+  <!-- Form Section -->
+  <div class="form-section">
+    <h2>Create Your Account</h2>
+    <form (ngSubmit)="signup()" #signupForm="ngForm">
+      <input 
+        type="text" 
+        placeholder="Username" 
+        [(ngModel)]="username" 
+        name="username" 
+        required 
+      />
+      <input 
+        type="email" 
+        placeholder="Email" 
+        [(ngModel)]="email" 
+        name="email" 
+        required 
+      />
+      <input 
+        type="password" 
+        placeholder="Password" 
+        [(ngModel)]="password" 
+        name="password" 
+        required 
+      />
+      <select [(ngModel)]="role" name="role" required>
+        <option value="candidate">Candidate</option>
+        <option value="hr-admin">HR Admin</option>
+      </select>
+      <button type="submit" [disabled]="signupForm.invalid">Sign Up</button>
+    </form>
+
+    <p *ngIf="signupSuccessMessage" class="success-message">{{ signupSuccessMessage }}</p>
+    <p *ngIf="signupErrorMessage" class="error-message">{{ signupErrorMessage }}</p>
+
+    <p class="login-link">Already have an account?
+      <button type="button" routerLink="/login" class="secondary-btn">Login</button>
+    </p>
+  </div>
+
+  <!-- Rules Section -->
+  <div class="rules-section">
+    <h3>Signup Rules</h3>
+    <ul>
+      <li><strong>Username:</strong> 4–9 characters, only letters or letters+numbers</li>
+      <li><strong>Email:</strong>
+        <ul>
+          <li>Candidates → any valid email</li>
+          <li>HR Admins → must end with <code>@mmc.com</code></li>
+        </ul>
+      </li>
+      <li><strong>Password:</strong> 5–9 characters, must include letters, numbers, and special characters</li>
+    </ul>
+  </div>
+</div>

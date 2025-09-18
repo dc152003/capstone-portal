@@ -1,0 +1,64 @@
+<app-navbar></app-navbar>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+/>
+<div class="container" role="main" aria-label="Dashboard">
+  <!-- <h2>Recruitment Agent</h2> -->
+ 
+  <!-- HR Admin View -->
+  <div *ngIf="role === 'hr-admin'" class="role-view">
+    <p class="welcome-text">Welcome back, <strong>{{ usernameDisplay }}</strong> 👋</p>
+    <p class="role-badge">Role: HR Admin</p>
+ 
+    <!-- Stats Cards -->
+    <div class="cards-container">
+      <div class="card">
+        <i class="fa-solid fa-clipboard-list card-icon"></i>
+        <h3>{{ stats.jobs }}</h3>
+        <p>Job Descriptions Created</p>
+      </div>
+      <div class="card">
+        <i class="fa-solid fa-file-arrow-up card-icon"></i>
+        <h3>{{ stats.resumes }}</h3>
+        <p>Resumes Uploaded</p>
+      </div>
+      <div class="card">
+        <i class="fa-solid fa-user-plus card-icon"></i>
+        <h3>{{ stats.candidates }}</h3>
+        <p>Candidate Users Registered</p>
+      </div>
+      <div class="card">
+        <!-- Make sure this icon element is present -->
+        <i class="fa-solid fa-user-plus card-icon"></i>
+        <h3>{{ stats.candidatesApplied }}</h3>
+        <p>Candidates Applied</p>
+      </div>
+    </div>
+ 
+    <!-- Insights Section -->
+    <section class="insights">
+      <h4>Insights</h4>
+      <div class="placeholder-chart">
+        <p>📊 Charts coming soon (e.g. skills distribution, resumes per job)</p>
+      </div>
+    </section>
+  </div>
+ 
+  <!-- Candidate View -->
+  <div *ngIf="role === 'candidate'" class="role-view">
+    <h3>Welcome, {{ usernameDisplay }} 🎉</h3>
+    <p class="role-badge">Role: Candidate</p>
+    <p>Explore job descriptions and upload your resume for positions you like.</p>
+  </div>
+ 
+  <!-- Fallback if no role -->
+  <div *ngIf="!role" class="no-role">
+    <p>Please <a routerLink="/login">login</a> to access the dashboard.</p>
+  </div>
+</div>
+ 
+<app-footer></app-footer>
+ 
+ 
+ 

@@ -1,0 +1,27 @@
+<div class="container">
+  <h2>Login</h2>
+  <form (ngSubmit)="login()" #loginForm="ngForm">
+    <input 
+      type="email" 
+      placeholder="Email (username@mmc.com)" 
+      [(ngModel)]="email" 
+      name="email" 
+      required 
+    />
+    <input 
+      type="password" 
+      placeholder="Password (letters and numbers)" 
+      [(ngModel)]="password" 
+      name="password" 
+      required 
+    />
+    <button type="submit" [disabled]="loginForm.invalid">Login</button>
+  </form>
+
+  <p *ngIf="loginSuccessMessage" class="success-message">{{ loginSuccessMessage }}</p>
+  <p *ngIf="loginErrorMessage" class="error-message">{{ loginErrorMessage }}</p>
+
+  <p>Don’t have an account?
+    <button type="button" routerLink="/signup" class="secondary-btn">Sign Up</button>
+  </p>
+</div>

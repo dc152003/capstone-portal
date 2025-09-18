@@ -1,0 +1,107 @@
+/* Container */
+.container {
+    max-width: 400px;
+    margin: 5rem auto;
+    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    border-top: 6px solid #005587; /* Marsh McLennan blue */
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333;
+  }
+  
+  /* Heading */
+  .container h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 600;
+    color: #005587;
+  }
+  
+  /* Form */
+  .container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  /* Input Fields */
+  .container input {
+    padding: 0.9rem 1rem;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .container input:focus {
+    border-color: #0077c8;
+    box-shadow: 0 0 6px rgba(0, 119, 200, 0.2);
+  }
+  
+  /* Primary Button */
+  .container button[type="submit"] {
+    background: linear-gradient(135deg, #005587, #0077c8);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
+  
+  .container button[type="submit"]:hover {
+    background: linear-gradient(135deg, #0077c8, #0091da);
+    transform: translateY(-2px);
+  }
+  
+  .container button[type="submit"]:disabled {
+    background: #cfd8dc;
+    cursor: not-allowed;
+  }
+  
+  /* Secondary Button (Sign Up link) */
+  .secondary-btn {
+    background: none;
+    border: 1px solid #005587;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #005587;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 0.5rem;
+  }
+  
+  .secondary-btn:hover {
+    background: #005587;
+    color: #fff;
+  }
+  
+  /* Messages */
+  .success-message {
+    margin-top: 1rem;
+    color: #2e7d32;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  
+  .error-message {
+    margin-top: 1rem;
+    color: #c62828;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+  
+  /* Footer text */
+  .container p {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 0.95rem;
+    color: #444;
+  }

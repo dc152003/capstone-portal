@@ -1,0 +1,255 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(90deg, #003366, #005587, #0077c8); /* Gradient blues */
+  color: #fff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+ 
+.logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* center logo and text horizontally */
+}
+ 
+.project-name {
+  margin-top: 5%; /* space below logo */
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  user-select: none;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+/* Left Section */
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+ 
+/* .mercer-logo {
+  height: 40px;
+  margin-right: 2rem;
+} */
+ 
+.mercer-logo {
+  height: 24px;
+  width:auto;
+  margin-right: 1rem;
+  filter: brightness(0) invert(1); /* Makes logo appear pure white */
+}
+ 
+/* Nav Buttons */
+.nav-left button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+ 
+.nav-left button:hover {
+  color: #00a9e0;
+}
+ 
+.nav-left button::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  left: 0;
+  bottom: -3px;
+  background-color: #00a9e0;
+  transition: width 0.3s ease;
+}
+ 
+.nav-left button:hover::after {
+  width: 100%;
+}
+ 
+/* Right Section */
+.nav-right {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+ 
+/* User Menu Icon */
+.user-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  cursor: pointer;
+  background: #f1f1f1;
+  object-fit: cover;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+ 
+.user-icon:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 8px rgba(0, 169, 224, 0.5);
+}
+ 
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 115%;
+  right: 0;
+  background: #ffffff;
+  color: #333;
+  border-radius: 10px;
+  padding: 1rem;
+  min-width: 230px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  font-size: 0.9rem;
+  animation: fadeIn 0.25s ease-in-out;
+}
+ 
+.dropdown p {
+  margin: 0.4rem 0;
+}
+ 
+.dropdown .role {
+  font-style: italic;
+  color: #0077c8;
+}
+ 
+/* Dropdown Buttons */
+.dropdown button {
+  margin-top: 0.8rem;
+  width: 100%;
+  padding: 0.6rem;
+  border: none;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #005587, #0077c8);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+ 
+.dropdown button:hover {
+  background: linear-gradient(135deg, #0077c8, #00a9e0);
+  transform: translateY(-1px);
+}
+ 
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+ 
+/* Toggle switch styling */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+  margin-right: 8px;
+}
+ 
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+ 
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ccc;
+  border-radius: 22px;
+  transition: .4s;
+}
+ 
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: .4s;
+}
+ 
+input:checked + .slider {
+  background-color: #0078d7;
+}
+ 
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+ 
+.toggle-theme {
+  display: flex;
+  align-items: center;
+  margin-top: 12px;
+}
+ 
+.nav-left button {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 6px 6px 0 0; /* rounded top corners only */
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+  border-bottom: 2px solid transparent; /* default no underline */
+}
+ 
+.nav-left button:hover {
+  color: #00a9e0;
+}
+ 
+.nav-left button::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 2px;
+  left: 0;
+  bottom: 0;
+  background-color: #00a9e0;
+  transition: width 0.3s ease;
+}
+ 
+.nav-left button:hover::after {
+  width: 100%;
+}
+ 
+/* Active button underline stays visible */
+.nav-left button.active {
+  color: #00a9e0;
+  border-bottom: 2px solid #00a9e0;
+}
+ 
+.nav-left button.active::after {
+  width: 100%;
+  background-color: transparent; /* hide the hover underline since border-bottom is visible */
+}
+ 

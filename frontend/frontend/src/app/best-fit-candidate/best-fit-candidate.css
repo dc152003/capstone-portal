@@ -1,0 +1,118 @@
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 16px rgba(0, 51, 102, 0.1);
+}
+
+/* Heading with HR underline */
+h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #003366;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+h2::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #005a8c, #0096c7);
+  margin: 8px 0 20px;
+  border-radius: 2px;
+}
+
+/* Form controls */
+.form-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.form-controls label {
+  font-weight: 500;
+  color: #003366;
+  margin-right: 6px;
+}
+
+.form-controls select,
+.form-controls input {
+  padding: 8px 12px;
+  border: 1px solid #ccd6e0;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+  transition: border 0.2s ease;
+}
+
+.form-controls select:focus,
+.form-controls input:focus {
+  border-color: #0096c7;
+  box-shadow: 0 0 4px rgba(0, 150, 199, 0.3);
+}
+
+.form-controls button {
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #005a8c, #0096c7);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.form-controls button:hover {
+  background: linear-gradient(135deg, #004d73, #0081a7);
+  transform: translateY(-1px);
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+thead {
+  background: #f5faff;
+}
+
+th, td {
+  border: 1px solid #e1e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  background: #005a8c;
+  color: #fff;
+  font-weight: 500;
+}
+
+tr:nth-child(even) {
+  background: #f9fcff;
+}
+
+/* Export button inside table */
+td button {
+  padding: 6px 10px;
+  background: #0096c7;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+td button:hover {
+  background: #007ea6;
+}

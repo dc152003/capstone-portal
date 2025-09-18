@@ -1,0 +1,323 @@
+/* Container Styling */
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+}
+ 
+h2 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #003366;
+  margin-bottom: 20px;
+}
+ 
+h2::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #005a8c, #0096c7);
+  margin: 8px 0 20px;
+  border-radius: 2px;
+}
+ 
+ 
+/* Form */
+form {
+  background: #ffffff;
+  padding: 28px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  display: grid;
+  gap: 18px;
+}
+ 
+label {
+  display: flex;
+  flex-direction: column;
+  font-size: 15px;
+  font-weight: 500;
+  color: #003366;
+}
+ 
+input[type="text"],
+select,
+input[type="file"] {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px solid #ccd6e0;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+ 
+input[type="text"]:focus,
+select:focus,
+input[type="file"]:focus {
+  border-color: #005a8c;
+  box-shadow: 0 0 5px rgba(0, 90, 140, 0.3);
+  outline: none;
+}
+ 
+/* Links */
+a {
+  color: #005a8c;
+  font-size: 14px;
+  transition: color 0.2s ease;
+}
+ 
+a:hover {
+  color: #0077b6;
+  text-decoration: underline;
+}
+ 
+/* Buttons */
+button {
+  background: linear-gradient(135deg, #005a8c, #0077b6);
+  color: #ffffff;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+ 
+button:hover {
+  background: linear-gradient(135deg, #0077b6, #0096c7);
+  transform: translateY(-2px);
+}
+ 
+button:disabled {
+  background: #a6c8e0;
+  cursor: not-allowed;
+}
+ 
+/* Messages */
+p {
+  font-size: 14px;
+  margin-top: 6px;
+}
+ 
+p[style*="color: green"] {
+  color: #0f5132 !important;
+  background: #e6f9f0;
+  border: 1px solid #badbcc;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+ 
+p[style*="color: red"] {
+  color: #842029 !important;
+  background: #fde2e2;
+  border: 1px solid #f5c2c7;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+ 
+/* Candidate Summary Card */
+.candidate-summary-card {
+  margin-top: 30px;
+}
+ 
+.candidate-summary-card h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #005a8c;
+  margin-bottom: 20px;
+}
+ 
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #e1eaf4;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+ 
+.summary-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+ 
+/* Summary Details Text */
+.summary-details p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #333;
+}
+.export-button-container button {
+  background: linear-gradient(135deg, #0096c7, #00b4d8);
+}
+ 
+.export-button-container button:hover {
+  background: linear-gradient(135deg, #00b4d8, #48cae4);
+}
+ 
+ 
+/* Drag & Drop Upload Box */
+.upload-box {
+  border: 2px dashed #0077b6;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9fafb;
+  color: #555;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 1rem;
+}
+ 
+.upload-box:hover {
+  background-color: #eef6fb;
+  border-color: #0096c7;
+}
+ 
+.upload-box.dragover {
+  background-color: #dff6ff;
+  border-color: #005a8c;
+}
+ 
+.upload-box i {
+  font-size: 40px;
+  color: #0077b6;
+  margin-bottom: 10px;
+  display: block;
+}
+ 
+.upload-box span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #777;
+  font-style: italic;
+}
+ 
+.upload-box input[type="file"] {
+  display: none; /* Hide the actual file input */
+}
+ 
+/* File selected inside upload box */
+.file-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 15px;
+  color: #004080;
+  font-weight: 500;
+}
+ 
+.file-selected i {
+  font-size: 22px;
+  color: #e63946;
+}
+ 
+ 
+ 
+/* Upload Box Styling */
+.upload-box {
+  border: 2px dashed #0077b6;
+  border-radius: 10px;
+  padding: 40px;
+  text-align: center;
+  background-color: #f9fafb;
+  color: #555;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 1rem;
+}
+ 
+.upload-box:hover {
+  background-color: #eef6fb;
+  border-color: #0096c7;
+  transform: translateY(-2px);
+}
+ 
+.upload-box.dragover {
+  background-color: #dff6ff;
+  border-color: #005a8c;
+}
+ 
+.upload-box i {
+  font-size: 40px;
+  color: #0077b6;
+  margin-bottom: 12px;
+  display: block;
+}
+ 
+.upload-box span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #777;
+  font-style: italic;
+}
+ 
+.upload-box input[type="file"] {
+  display: none; /* Hide real input */
+}
+ 
+/* Candidate Summary Card */
+.candidate-summary-card {
+  background: #ffffff;
+  border: 1px solid #e1eaf4;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+}
+.summary-card {
+  position: relative; /* for absolute positioning of export button */
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid #dfe7f1;
+  border-radius: 8px;
+  background: #fafafa;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+ 
+.summary-details p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #333;
+}
+ 
+/* Export PDF Button Styling */
+.export-button-container {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  text-align: right;
+}
+.export-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #0077b6, #0096c7);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 118, 184, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+ 
+.export-btn:hover {
+  background: linear-gradient(135deg, #005f8c, #0077b6);
+  transform: translateY(-2px);
+}
+ 

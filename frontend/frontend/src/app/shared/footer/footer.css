@@ -1,0 +1,124 @@
+.footer {
+  background: #000000; /* solid black footer */
+  color: #ffffff; /* white text */
+  padding: 40px 20px;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 100;
+}
+
+.footer .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.left-section {
+  flex: 1 1 45%;
+  min-width: 280px;
+}
+
+.logo-and-name {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.company-name {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: #cccccc; /* lighter gray for readability */
+}
+
+.links {
+  margin-bottom: 20px;
+}
+
+.links .link {
+  margin-right: 15px;
+  font-size: 0.9rem;
+  color: #aaaaaa;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.links .link:hover {
+  color: #ffffff;
+}
+
+.copyright {
+  font-size: 0.8rem;
+  color: #888888;
+}
+
+.right-section {
+  flex: 1 1 40%;
+  min-width: 260px;
+  text-align: right;
+}
+
+.nav-links {
+  margin-bottom: 15px;
+}
+
+.nav-link {
+  margin-left: 20px;
+  font-size: 0.95rem;
+  color: #aaaaaa;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.social-button svg {
+  fill: #aaaaaa;
+  transition: transform 0.3s ease, fill 0.3s ease;
+}
+
+.social-button:hover svg {
+  transform: scale(1.15);
+  fill: #ffffff; /* turns white on hover */
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .footer .container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .right-section {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .nav-link {
+    margin: 0 10px;
+  }
+
+  .social-icons {
+    justify-content: center;
+  }
+}

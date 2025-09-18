@@ -1,0 +1,57 @@
+<header class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-left">
+    <div class="logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Mercer_h_rgb_c.svg"
+           alt="Mercer Logo" class="mercer-logo" />
+           <div class="project-name">Recruitment Agent</div>  <!-- Added project name here -->
+    </div>
+ 
+    <button routerLink="/dashboard" [class.active]="currentUrl === '/dashboard'">Dashboard</button>
+ 
+    <button *ngIf="role === 'hr-admin'" routerLink="/dashboard/create-job" [class.active]="currentUrl === '/dashboard/create-job'">
+      Create Job Description
+    </button>
+ 
+    <button *ngIf="role === 'candidate'" routerLink="/dashboard/job-descriptions" [class.active]="currentUrl === '/dashboard/job-descriptions'">
+      Job Descriptions
+    </button>
+ 
+    <button *ngIf="role" routerLink="/dashboard/resume-upload" [class.active]="currentUrl === '/dashboard/resume-upload'">
+      Resume Upload
+    </button>
+ 
+    <button *ngIf="role === 'hr-admin'" routerLink="/dashboard/display-resumes" [class.active]="currentUrl === '/dashboard/display-resumes'">
+      View Resumes
+    </button>
+ 
+    <button *ngIf="role === 'hr-admin'" routerLink="/dashboard/best-fit-candidate" [class.active]="currentUrl === '/dashboard/best-fit-candidate'">
+      Best Fit Candidate
+    </button>
+  </div>
+ 
+  <div class="nav-right">
+    <!-- User Profile Icon -->
+    <div class="user-menu" (click)="toggleDropdown()">
+      <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="User" class="user-icon" />
+     
+      <!-- Dropdown -->
+      <div class="dropdown" *ngIf="dropdownOpen">
+        <p><strong>Username : <i>{{ username }}</i></strong></p>
+        <p> Email : {{ email }}</p>
+        <p class="role">Role : {{ role }}</p>
+ 
+        <div class="toggle-theme">
+          <label class="switch">
+            <input type="checkbox" (change)="toggleDarkMode($event)">
+            <span class="slider round"></span>
+          </label>
+          <span>Dark Mode</span>
+        </div>
+ 
+        <button (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+</header>
+ 
+ 

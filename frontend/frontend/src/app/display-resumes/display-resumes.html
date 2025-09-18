@@ -1,0 +1,84 @@
+<!-- <app-navbar></app-navbar>
+
+<div class="container">
+  <h2>All Resumes</h2>
+
+  <table *ngIf="resumes.length > 0" class="resumes-table" border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr>
+        <th>S.No</th> 
+        <th>Candidate Name</th>
+        <th>Job Description Title</th>
+        <th>Uploaded Date</th>
+        <th>Resume</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let resume of resumes; let i = index">
+        <td>{{ i + 1 }}.</td> 
+        <td>{{ resume.candidateName }}</td>
+        <td>{{ resume.jobTitle }}</td>
+        <td>{{ resume.uploadedAt | date:'medium' }}</td>
+        <td>
+          <a [href]="getResumeUrl(resume.resumeUrl)" target="_blank" rel="noopener noreferrer">View Resume</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="resumes.length === 0">No resumes found.</p>
+
+  <p *ngIf="errorMessage" style="color: red;">{{ errorMessage }}</p>
+</div> -->
+
+<app-navbar></app-navbar>
+<div class="container" role="main" aria-label="All Resumes">
+  <h2>All Resumes</h2>
+ 
+  <!-- Search Bar -->
+  <div class="search-bar-container">
+    <input
+      type="text"
+      placeholder="Search by candidate name or job description"
+      [(ngModel)]="searchTerm"
+      (input)="filterResumes()"
+      class="search-input"
+      aria-label="Search resumes"
+    />
+  </div>
+ 
+  <!-- Error Message -->
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+ 
+  <!-- Resumes Table -->
+  <table class="resumes-table" *ngIf="filteredResumes.length > 0; else noResumes">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Candidate Name</th>
+        <th>Job Description Title</th>
+        <th>Uploaded Date</th>
+        <th>Resume</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let resume of filteredResumes; let i = index">
+        <td>{{ i + 1 }}.</td>
+        <td [innerHTML]="highlight(resume.candidateName)"></td>
+<td [innerHTML]="highlight(resume.jobDescription || resume.jobTitle)"></td>
+        <td>{{ resume.uploadedAt | date:'medium' }}</td>
+        <td>
+          <a [href]="getResumeUrl(resume.resumeUrl)" target="_blank" rel="noopener noreferrer">
+            View Resume
+          </a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+ 
+  <!-- No Resumes Found -->
+  <ng-template #noResumes>
+    <p class="no-resumes-message">No resumes found.</p>
+  </ng-template>
+</div>
+ 

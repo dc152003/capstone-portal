@@ -1,0 +1,75 @@
+<app-navbar></app-navbar>
+ 
+<div class="container">
+  <h2>Manage Job Postings</h2>
+ 
+  <!-- Add Job Message (above create form) -->
+  <div *ngIf="addMessage" class="message-box" [ngClass]="addMessage.type" style="margin-bottom: 16px;">
+    {{ addMessage.text }}
+  </div>
+ 
+  <section class="create-job-section">
+    <h3>Create New Job Posting</h3>
+    <form (ngSubmit)="addJob()" #jobForm="ngForm">
+      <input type="text" placeholder="Job Title" [(ngModel)]="newJob.title" name="title" required />
+      <input type="text" placeholder="Location" [(ngModel)]="newJob.location" name="location" />
+      <input type="number" placeholder="Experience (years)" [(ngModel)]="newJob.experience" name="experience" min="0" />
+      <textarea placeholder="Job Description" [(ngModel)]="newJob.description" name="description" required></textarea>
+      <input type="text" placeholder="Preferred Skills (comma separated)" [(ngModel)]="newJob.preferredSkillsStr" name="preferredSkills" />
+      <input type="text" placeholder="Education" [(ngModel)]="newJob.education" name="education" />
+      <button type="submit" [disabled]="jobForm.invalid">Add Job</button>
+    </form>
+  </section>
+ 
+  <!-- Existing Job Message (above existing jobs) -->
+  <div *ngIf="existingJobMessage" class="message-box" [ngClass]="existingJobMessage.type" style="margin: 20px 0;">
+    {{ existingJobMessage.text }}
+  </div>
+ 
+  <section class="existing-jobs-section" style="margin-top:18px;">
+    <h3>Existing Job Postings</h3>
+    <div class="search-bar-container">
+      <div class="search-bar">
+        <input
+          type="text"
+          placeholder="Search by title or location"
+          [(ngModel)]="searchTerm"
+          (input)="filterJobs()"
+          class="search-input"
+        />
+        <span class="search-icon" aria-hidden="true">
+          <!-- SVG search icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-search" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </span>
+      </div>
+    </div>
+    <div *ngFor="let job of filteredJobs" class="job-card" style="border:1px solid #eee; padding:12px; margin-bottom:10px;">
+      <div *ngIf="editingJobId !== job._id">
+        <h4>{{ job.title }} <small>({{ job.location }})</small></h4>
+        <p>{{ job.description }}</p>
+        <p><strong>Experience:</strong> {{ job.experience || 'N/A' }} yrs | <strong>Skills:</strong> {{ job.preferredSkills?.join(', ') }}</p>
+        <div class="actions">
+          <button (click)="editJob(job)">Edit</button>
+          <button (click)="confirmDelete(job._id)">Delete</button>
+        </div>
+      </div>
+ 
+      <div *ngIf="editingJobId === job._id">
+        <input type="text" [(ngModel)]="editedJob.title" placeholder="Job Title" />
+        <input type="text" [(ngModel)]="editedJob.location" placeholder="Location" />
+        <input type="number" [(ngModel)]="editedJob.experience" placeholder="Experience (years)" min="0" />
+        <textarea [(ngModel)]="editedJob.description" placeholder="Job Description"></textarea>
+        <input type="text" [(ngModel)]="editedJob.preferredSkillsStr" placeholder="Preferred Skills (comma separated)" />
+        <div class="edit-form-actions">
+          <button class="btn-save" (click)="saveEdit(job)">Save</button>
+          <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </section>
+ 
+</div>
+ 

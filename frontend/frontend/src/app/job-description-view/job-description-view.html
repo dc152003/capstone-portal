@@ -1,0 +1,22 @@
+<app-navbar></app-navbar>
+
+<div class="container" *ngIf="!loading && !error">
+  <h2>{{ job?.title }}</h2>
+  <p><strong>Location:</strong> {{ job?.location || 'N/A' }}</p>
+  <p><strong>Experience:</strong> {{ job?.experience || 'N/A' }} years</p>
+  <p><strong>Preferred Skills:</strong> {{ job?.preferredSkills?.join(', ') || 'N/A' }}</p>
+  <p><strong>Education:</strong> {{ job?.education || 'N/A' }}</p>
+
+  <section class="description">
+    <h3>Description</h3>
+    <p style="white-space: pre-wrap;">{{ job?.description }}</p>
+  </section>
+
+  <div class="actions" style="margin-top: 20px;">
+    <button (click)="downloadPDF()">Download PDF</button>
+    <button (click)="goBack()">Back to Job Descriptions</button>
+  </div>
+</div>
+
+<div *ngIf="loading" class="loading">Loading job description...</div>
+<div *ngIf="error" class="error">{{ error }}</div>

@@ -1,0 +1,134 @@
+/* Container */
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0px 4px 16px rgba(0, 51, 102, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2c3e50;
+}
+ 
+/* Heading with MMC underline */
+.container h2 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #003366;
+  margin-bottom: 10px;
+  position: relative;
+}
+ 
+.container h2::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, #005a8c, #0096c7);
+  margin: 8px 0 20px;
+  border-radius: 2px;
+}
+ 
+/* Table */
+.resumes-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #34495e;
+}
+ 
+.resumes-table thead {
+  background: #f5faff;
+}
+ 
+.resumes-table th,
+.resumes-table td {
+  border: 1px solid #e1e8f0;
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: middle;
+}
+ 
+.resumes-table th {
+  background: #005a8c;
+  color: #fff;
+  font-weight: 500;
+  user-select: none;
+}
+ 
+.resumes-table tbody tr:nth-child(even) {
+  background: #f9fcff;
+}
+ 
+.resumes-table tbody tr:hover {
+  background: #d6eaf8;
+  cursor: pointer;
+}
+ 
+/* Serial number column */
+.resumes-table td:first-child {
+  width: 50px;
+  font-weight: 600;
+  color: #2980b9;
+  text-align: center;
+}
+ 
+/* Links */
+.resumes-table a {
+  color: #2980b9;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+ 
+.resumes-table a:hover {
+  color: #1c5980;
+  text-decoration: underline;
+}
+ 
+/* No resumes message */
+p[ng-reflect-ng-if="true"] {
+  text-align: center;
+  font-style: italic;
+  color: #7f8c8d;
+  margin-top: 2rem;
+  font-size: 1.1rem;
+}
+ 
+/* Error message */
+p[style*="color: red"] {
+  text-align: center;
+  font-weight: 600;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+}
+ .search-bar-container {
+  margin-bottom: 16px;
+  text-align: center;
+}
+ 
+.search-input {
+  width: 400px;
+  max-width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: 1px solid #d1d9e6;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+ 
+.search-input:focus {
+  border-color: #005a8c;
+  box-shadow: 0 0 5px rgba(0, 90, 140, 0.3);
+}
+ 
+mark {
+  background-color: #fffb91;
+  color: #000;
+  font-weight: 600;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+ 

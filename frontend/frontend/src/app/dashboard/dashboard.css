@@ -1,0 +1,173 @@
+/* Container improvements */
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 30px 25px; /* slightly more padding for breathing room */
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 24px rgba(0, 51, 102, 0.1); /* slightly stronger shadow */
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  transition: box-shadow 0.3s ease;
+}
+ 
+.container:hover {
+  box-shadow: 0px 10px 40px rgba(0, 51, 102, 0.15);
+}
+ 
+h2 {
+  font-size: 30px;
+  font-weight: 700;
+  color: #003366;
+  margin-bottom: 25px;
+  padding-bottom: 12px;
+  text-align: center;      
+  width: 100%;            
+  max-width: none;          
+  margin-left: 0;          
+  margin-right: 0;
+  position: relative;      
+}
+h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1100px;
+  height: 3px;
+  background: linear-gradient(to right, #005a8c, #0096c7);
+  border-radius: 2px;
+}
+ 
+/* Role View */
+.role-view {
+  margin-top: 25px;
+}
+ 
+.welcome-text {
+  font-size: 18px;
+  color: #222;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+ 
+.role-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  background: #005a8c;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 14px;
+  margin: 8px 0 22px;
+  box-shadow: 0 2px 8px rgba(0, 90, 140, 0.3);
+  font-weight: 600;
+}
+ 
+/* Cards Container */
+.cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  justify-content: space-between;
+}
+ 
+/* Individual Card */
+.card {
+  flex: 1 1 220px;
+  padding: 24px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f0f7ff, #ffffff);
+  border: 1px solid #dce6f0;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: default;
+}
+ 
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0px 10px 28px rgba(0, 51, 102, 0.18);
+}
+ 
+.card h3 {
+  font-size: 26px;
+  margin-bottom: 8px;
+  color: #005a8c;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+ 
+.card p {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.4;
+}
+ 
+/* Card Icon */
+.card-icon {
+  font-size: 40px;
+  color: #005a8c;
+  margin-bottom: 16px;
+  display: block;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.1));
+}
+ 
+/* Insights Section */
+.insights {
+  margin-top: 40px;
+  padding: 20px 25px;
+  background-color: #f5fbff;
+  border-radius: 12px;
+  border: 1px solid #d0e4f7;
+  box-shadow: inset 0 0 10px rgba(0, 90, 140, 0.05);
+}
+ 
+.insights h4 {
+  font-size: 22px;
+  color: #003366;
+  margin-bottom: 18px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+ 
+.placeholder-chart {
+  border: 2px dashed #a9c4e8;
+  padding: 40px;
+  text-align: center;
+  color: #7a9cc6;
+  border-radius: 10px;
+  background: #e9f2ff;
+  font-size: 18px;
+  user-select: none;
+}
+ 
+/* No Role Fallback */
+.no-role {
+  margin-top: 30px;
+  text-align: center;
+  color: #666;
+  font-size: 16px;
+}
+ 
+.no-role a {
+  color: #005a8c;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+ 
+.no-role a:hover {
+  text-decoration: underline;
+  color: #0077c8;
+}
+ 
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .cards-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+ 
+  .card {
+    flex: 1 1 100%;
+  }
+}
+ 

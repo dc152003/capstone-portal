@@ -1,0 +1,98 @@
+<app-navbar></app-navbar>
+ 
+<div class="container">
+  <h2>Resume Upload</h2>
+ 
+  <form (ngSubmit)="onSubmit()" #resumeForm="ngForm" enctype="multipart/form-data" novalidate>
+    <!-- Candidate Name -->
+    <label>
+      Candidate Name:
+      <input type="text" name="candidateName" [(ngModel)]="candidateName" [readonly]="!isHrAdmin" required />
+    </label>
+ 
+    <!-- Select Job -->
+    <label>
+      Select Job Description:
+      <select name="jobId" [(ngModel)]="selectedJobId" (change)="onJobChange()" required>
+        <option value="" disabled>Select a job</option>
+        <option *ngFor="let job of jobs" [value]="job._id">{{ job.title }}</option>
+      </select>
+    </label>
+ 
+    <!-- JD Link -->
+    <div *ngIf="selectedJob" style="margin-bottom: 1rem;">
+      <a (click)="viewJD()" style="text-decoration: underline; cursor: pointer;">
+        Read full JD: {{ selectedJob.title }}
+      </a>
+    </div>
+ 
+    <!-- Drag & Drop Resume Upload -->
+    <div class="upload-box" (click)="fileInput.click()" (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.dragover]="isDragOver">
+      <i class="fas fa-cloud-upload-alt" *ngIf="!selectedFileName"></i>
+ 
+      <div *ngIf="!selectedFileName">
+        <strong>Drag & drop your resume here</strong>
+        <span>or click to browse (PDF only)</span>
+      </div>
+ 
+      <div *ngIf="selectedFileName" class="file-selected">
+        <i class="fas fa-file-pdf"></i>
+        <span>{{ selectedFileName }}</span>
+      </div>
+ 
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" />
+    </div>
+ 
+    <!-- HR Admin Actions -->
+    <div *ngIf="isHrAdmin" style="margin-top: 1rem;">
+      <button type="button" (click)="uploadResume()" [disabled]="!canUpload()" style="margin-right: 1rem;">
+        Upload
+      </button>
+ 
+      <button type="button" (click)="analyzeResume()" [disabled]="!uploadedResumeId || loadingAi">
+        {{ loadingAi ? 'Analyzing...' : 'AI Analyze' }}
+      </button>
+ 
+      <p *ngIf="uploadMessage" style="color: green; margin-top: 0.5rem;">
+        {{ uploadMessage }}
+      </p>
+      <p *ngIf="errorAi" style="color: red; margin-top: 0.5rem;">
+        {{ errorAi }}
+      </p>
+    </div>
+ 
+    <!-- Candidate Actions -->
+    <div *ngIf="!isHrAdmin" style="margin-top: 1rem;">
+      <button type="submit" [disabled]="!canSubmit()">Submit</button>
+      <p *ngIf="submitMessage" style="color: green; margin-top: 0.5rem;">
+        {{ submitMessage }}
+      </p>
+    </div>
+  </form>
+ 
+  <!-- AI Candidate Summary Card -->
+  <div *ngIf="aiResults?.length" class="candidate-summary-card" style="margin-top: 2rem;">
+    <h3>AI Resume Analysis Results</h3>
+    <div *ngFor="let r of aiResults" class="summary-card">
+      <div class="export-button-container">
+        <button class="export-btn" (click)="exportReport(r.resumeId)">
+          📄 Export PDF
+        </button>
+      </div>
+ 
+      <div class="summary-details">
+        <p><strong>Candidate Name:</strong> {{ r.candidateName }}</p>
+        <p><strong>Experience:</strong> {{ r.experience }}</p>
+        <p><strong>Skills:</strong> {{ r.skills?.join(', ') }}</p>
+        <p><strong>Relevance Score:</strong> {{ r.relevanceScore }}</p>
+        <p><strong>Comments/Review:</strong> {{ r.comments }}</p>
+        <p><strong>Resume Link:</strong>
+          <a [href]="r.resumeUrl" target="_blank" rel="noopener noreferrer">View Resume</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+ 
