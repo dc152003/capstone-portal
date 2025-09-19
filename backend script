@@ -1,0 +1,924 @@
+backend\middleware\authMiddleware.js
+const jwt = require("jsonwebtoken");
+const { jwtSecret } = require("../config");
+
+module.exports = function (req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ msg: "No token, authorization denied" });
+  }
+
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, jwtSecret);
+    req.user = decoded.user; 
+    next();
+  } catch (err) {
+    console.error("Token verification failed:", err.message);
+    res.status(401).json({ msg: "Token is not valid" });
+  }
+};
+
+backend\models\AIAnalysis.js
+const mongoose = require("mongoose");
+
+const AIAnalysisSchema = new mongoose.Schema({
+  resumeId: { type: mongoose.Schema.Types.ObjectId, ref: "Resume", required: true, unique: true },
+  jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+  candidateName: { type: String },
+  experience: { type: Number },
+  skills: [{ type: String }],
+  relevanceScore: { type: Number },
+  comments: { type: String },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+AIAnalysisSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+module.exports = mongoose.model("AIAnalysis", AIAnalysisSchema);
+const mongoose = require("mongoose");
+
+const JobSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  location: { type: String },
+  experience: { type: Number },
+  description: { type: String, required: true },
+  preferredSkills: [{ type: String }], 
+  education: { type: String },
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+}, { timestamps: true });
+
+module.exports = mongoose.model("Job", JobSchema);
+
+backend\models\Resume.js
+const mongoose = require("mongoose");
+
+const ResumeSchema = new mongoose.Schema({
+  candidateName: { type: String, required: true },
+  jobId: { type: mongoose.Schema.Types.ObjectId, ref: "Job", required: true },
+  uploadedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  resumeUrl: { type: String, required: true }, // file path or URL
+  uploadedAt: { type: Date, default: Date.now },
+
+  // New AI analysis fields
+  experience: { type: Number }, // years of experience
+  skills: [{ type: String }],   // array of skill strings
+  relevanceScore: { type: Number }, // 0-100 score
+  comments: { type: String }
+});
+
+module.exports = mongoose.model("Resume", ResumeSchema);
+
+backend\models\User.js
+const mongoose = require("mongoose");
+
+const UserSchema = new mongoose.Schema({
+  username: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  role: { type: String, enum: ["hr-admin", "candidate"], required: true }
+});
+
+module.exports = mongoose.model("User", UserSchema);
+
+backend\routes\ai.js
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const pdfParse = require('pdf-parse');
+const Resume = require('../models/Resume');
+const Job = require('../models/Job');
+const AIAnalysis = require('../models/AIAnalysis');
+const axios = require('axios');
+const authMiddleware = require('../middleware/authMiddleware');
+
+const router = express.Router();
+
+const OPENAI_API_KEY = process.env.MMC_OPENAI_API_KEY;
+const OPENAI_API_URL = process.env.MMC_OPENAI_BASE_URL || 'https://stg1.mmc-dallas-int-non-prod-ingress.mgti.mmc.com/coreapi/openai/v1/deployments/mmc-tech-gpt-4o-mini-128k-2024-07-18/chat/completions';
+
+async function extractTextFromPDF(filePath) {
+  const dataBuffer = fs.readFileSync(filePath);
+  const data = await pdfParse(dataBuffer);
+  return data.text;
+}
+
+function cleanAIResponse(text) {
+  if (!text) return '';
+  return text.replace(/```json|```/g, '').trim();
+}
+
+function parseExperience(exp) {
+  if (!exp) return null;
+  const match = exp.match(/(\d+(\.\d+)?)/);
+  if (match) {
+    return parseFloat(match[0]);
+  }
+  return null;
+}
+
+router.post('/analyze-resume', authMiddleware, async (req, res) => {
+  try {
+    const { resumeId } = req.body;
+    if (!resumeId) return res.status(400).json({ error: 'resumeId is required' });
+
+    const resume = await Resume.findById(resumeId).populate('jobId');
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+    const job = resume.jobId;
+    if (!job) return res.status(404).json({ error: 'Job not found for this resume' });
+
+    const resumePath = path.resolve(resume.resumeUrl);
+    if (!fs.existsSync(resumePath)) {
+      return res.status(500).json({ error: 'Resume file not found on server' });
+    }
+
+    const resumeText = await extractTextFromPDF(resumePath);
+
+    const systemPrompt = `You are a HR recruiter expert. Analyze the candidate's resume text and compare it with the job description. 
+Extract candidate name, experience, skills, and provide a relevance score (0-100) indicating how well the resume matches the job description.
+Provide comments/review on the match.
+Respond ONLY with a valid JSON object (no markdown, no extra text) with keys: candidateName, experience, skills (array), relevanceScore, comments.`;
+
+    const userPrompt = `
+Job Title: ${job.title}
+Job Description: ${job.description}
+Preferred Skills: ${job.preferredSkills ? job.preferredSkills.join(', ') : ''}
+Candidate Resume Text: ${resumeText}
+`;
+
+    let response;
+    try {
+      response = await axios.post(
+        OPENAI_API_URL,
+        {
+          model: 'gpt-4',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.7,
+          max_tokens: 500
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENAI_API_KEY}`
+          }
+        }
+      );
+    } catch (apiErr) {
+      console.error('OpenAI API call failed:', apiErr.response?.data || apiErr.message);
+      return res.status(500).json({ error: 'OpenAI API call failed', details: apiErr.response?.data || apiErr.message });
+    }
+
+    const aiContentRaw = response.data?.choices?.[0]?.message?.content || '';
+    const aiContentClean = cleanAIResponse(aiContentRaw);
+
+    let aiResult;
+    try {
+      aiResult = JSON.parse(aiContentClean);
+    } catch (err) {
+      console.error('Invalid JSON response from AI:', aiContentRaw);
+      return res.status(500).json({ error: 'Invalid JSON response from AI', rawResponse: aiContentRaw });
+    }
+
+    const expNum = parseExperience(aiResult.experience);
+
+    // Upsert AIAnalysis document
+    const aiAnalysisData = {
+      resumeId: resume._id,
+      jobId: job._id,
+      candidateName: aiResult.candidateName || resume.candidateName,
+      experience: isNaN(expNum) ? null : expNum,
+      skills: Array.isArray(aiResult.skills) ? aiResult.skills : [],
+      relevanceScore: aiResult.relevanceScore,
+      comments: aiResult.comments
+    };
+
+    const aiAnalysisDoc = await AIAnalysis.findOneAndUpdate(
+      { resumeId: resume._id },
+      aiAnalysisData,
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    );
+
+    res.json(aiAnalysisDoc);
+  } catch (err) {
+    console.error('AI analyze error:', err);
+    res.status(500).json({ error: 'Server error during AI analysis' });
+  }
+});
+
+module.exports = router;
+
+backend\routes\auth.js
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+const { jwtSecret } = require("../config");
+
+const router = express.Router();
+
+// Signup (register + return token)
+router.post("/signup", async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+
+    // --- Username validation ---
+    const usernameValid = /^(?=.*[a-zA-Z])[a-zA-Z0-9]{4,9}$/.test(username);
+    if (!usernameValid) {
+      return res
+        .status(400)
+        .json({ error: "Username must be 4-9 characters, letters or letters+numbers" });
+    }
+
+    // --- Email validation ---
+    if (role === "hr-admin") {
+      if (!/^[a-zA-Z0-9._%+-]+@mmc\.com$/.test(email)) {
+        return res.status(400).json({ error: "HR email must end with @mmc.com" });
+      }
+    } else if (role === "candidate") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return res.status(400).json({ error: "Invalid candidate email format" });
+      }
+    } else {
+      return res.status(400).json({ error: "Invalid role" });
+    }
+
+    // --- Password validation ---
+    const passwordValid = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{5,9}$/.test(password);
+    if (!passwordValid) {
+      return res.status(400).json({
+        error: "Password must be 5-9 characters, include letters, numbers, and special characters"
+      });
+    }
+
+    // --- Check duplicate ---
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ error: "User already exists" });
+    }
+
+    // --- Save new user ---
+    const hashedPass = await bcrypt.hash(password, 10);
+    user = new User({ username, email, password: hashedPass, role });
+    await user.save();
+
+    // --- Create JWT (with email inside) ---
+    const token = jwt.sign(
+      {
+        user: {
+          id: user._id,
+          role: user.role,
+          username: user.username,
+          email: user.email
+        }
+      },
+      jwtSecret,
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      message: "User registered successfully",
+      token
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Login
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // --- Validate email ---
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // --- Validate password format ---
+    const passwordValid = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).+$/.test(password);
+    if (!passwordValid) {
+      return res.status(400).json({ error: "Invalid password format" });
+    }
+
+    // --- Check if user exists ---
+    let user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ error: "Invalid credentials" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+    // --- Create JWT (with email inside) ---
+    const token = jwt.sign(
+      {
+        user: {
+          id: user._id,
+          role: user.role,
+          username: user.username,
+          email: user.email
+        }
+      },
+      jwtSecret,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+module.exports = router;
+
+
+backend\routes\bestfit.js
+const express = require('express');
+const Resume = require('../models/Resume');
+const Job = require('../models/Job');
+const AIAnalysis = require('../models/AIAnalysis');
+const authMiddleware = require('../middleware/authMiddleware');
+const path = require('path');
+const { generatePDF, generateCombinedPDF } = require('../utils/pdfExport');
+const { analyzeResume } = require('../utils/aiService');
+
+const router = express.Router();
+
+function parseExperience(exp) {
+  if (!exp) return null;
+  const match = exp.match(/(\d+(\.\d+)?)/);
+  if (match) {
+    return parseFloat(match[0]);
+  }
+  return null;
+}
+
+// POST /api/bestfit - get top N candidates ranked by AI relevance score
+router.post('/', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'hr-admin') return res.status(403).json({ msg: 'Access denied' });
+
+    const { jobId, count } = req.body;
+    if (!jobId) return res.status(400).json({ msg: 'jobId is required' });
+
+    const job = await Job.findById(jobId);
+    if (!job) return res.status(404).json({ msg: 'Job not found' });
+
+    const resumes = await Resume.find({ jobId });
+
+    const candidates = [];
+
+    for (const resume of resumes) {
+      let aiAnalysis = await AIAnalysis.findOne({ resumeId: resume._id });
+
+      if (!aiAnalysis) {
+        // Analyze on-demand and save AIAnalysis
+        try {
+          const aiResult = await analyzeResume(job, path.resolve(resume.resumeUrl));
+          const expNum = parseExperience(aiResult.experience);
+          aiAnalysis = new AIAnalysis({
+            resumeId: resume._id,
+            jobId: job._id,
+            candidateName: aiResult.candidateName || resume.candidateName,
+            experience: isNaN(expNum) ? null : expNum,
+            skills: Array.isArray(aiResult.skills) ? aiResult.skills : [],
+            relevanceScore: aiResult.relevanceScore,
+            comments: aiResult.comments
+          });
+          await aiAnalysis.save();
+        } catch (err) {
+          console.warn(`AI analysis failed for resume ${resume._id}: ${err.message}`);
+          continue; // skip this resume
+        }
+      }
+
+      candidates.push({
+        candidateName: aiAnalysis.candidateName,
+        experience: aiAnalysis.experience,
+        skills: aiAnalysis.skills,
+        relevanceScore: aiAnalysis.relevanceScore,
+        comments: aiAnalysis.comments,
+        resumeUrl: `${process.env.BASE_URL || 'http://localhost:5000'}/${resume.resumeUrl.replace(/\\/g, '/')}`,
+        resumeId: resume._id.toString()
+      });
+    }
+
+    candidates.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+
+    res.json(candidates.slice(0, count || 5));
+  } catch (err) {
+    console.error('Bestfit error:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
+
+// GET /api/bestfit/report/:resumeId - generate PDF report for candidate using AIAnalysis data
+router.get('/report/:resumeId', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'hr-admin') return res.status(403).json({ msg: 'Access denied' });
+
+    const { resumeId } = req.params;
+    const aiAnalysis = await AIAnalysis.findOne({ resumeId }).populate('jobId');
+    if (!aiAnalysis) return res.status(404).json({ msg: 'AI analysis not found for this resume' });
+
+    const reportData = {
+      _id: aiAnalysis._id,
+      candidateName: aiAnalysis.candidateName,
+      jobId: aiAnalysis.jobId,
+      experience: aiAnalysis.experience ?? 'N/A',
+      skills: aiAnalysis.skills || [],
+      relevanceScore: aiAnalysis.relevanceScore ?? 'N/A',
+      comments: aiAnalysis.comments || 'N/A'
+    };
+
+    const pdfPath = await generatePDF(reportData);
+
+    res.download(pdfPath, `candidate_report_${resumeId}.pdf`, (err) => {
+      if (err) {
+        console.error('PDF download error:', err);
+        res.status(500).send('Failed to download PDF');
+      }
+    });
+  } catch (err) {
+    console.error('Report generation error:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
+
+// POST /api/bestfit/report-all - generate combined PDF report for top N candidates
+router.post('/report-all', authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== 'hr-admin') return res.status(403).json({ msg: 'Access denied' });
+
+    const { jobId, count } = req.body;
+    if (!jobId) return res.status(400).json({ msg: 'jobId is required' });
+
+    const job = await Job.findById(jobId);
+    if (!job) return res.status(404).json({ msg: 'Job not found' });
+
+    const aiAnalyses = await AIAnalysis.find({ jobId });
+
+    const candidates = aiAnalyses
+      .map(ai => ({
+        candidateName: ai.candidateName,
+        experience: ai.experience,
+        skills: ai.skills,
+        relevanceScore: ai.relevanceScore,
+        comments: ai.comments,
+        resumeId: ai.resumeId.toString()
+      }))
+      .sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0))
+      .slice(0, count || 5);
+
+    if (candidates.length === 0) {
+      return res.status(404).json({ msg: 'No candidates found for report' });
+    }
+
+    const pdfPath = await generateCombinedPDF(candidates, job);
+
+    res.download(pdfPath, `bestfit_candidates_report_${jobId}.pdf`, (err) => {
+      if (err) {
+        console.error('PDF download error:', err);
+        res.status(500).send('Failed to download PDF');
+      }
+    });
+  } catch (err) {
+    console.error('Combined report generation error:', err);
+    res.status(500).json({ msg: 'Server error', error: err.message });
+  }
+});
+
+module.exports = router;
+
+backend\routes\dashboard.js
+const express = require("express");
+const authMiddleware = require("../middleware/authMiddleware");
+const Job = require("../models/Job");
+const Resume = require("../models/Resume");
+const User = require("../models/User");
+
+const router = express.Router();
+
+router.get("/stats", authMiddleware, async (req, res) => {
+  try {
+    const jobsCount = await Job.countDocuments();
+    console.log("Jobs count:", jobsCount);
+
+    const resumesCount = await Resume.countDocuments();
+    console.log("Resumes count:", resumesCount);
+
+    const candidatesCount = await User.countDocuments({ role: "candidate" });
+    console.log("Candidates count:", candidatesCount);
+
+    const candidatesAppliedCountAgg = await Resume.aggregate([
+      { $group: { _id: "$candidateName" } },
+      { $count: "count" }
+    ]);
+    const candidatesAppliedCount = candidatesAppliedCountAgg.length > 0 ? candidatesAppliedCountAgg[0].count : 0;
+    console.log("Candidates applied count:", candidatesAppliedCount);
+
+    res.json({
+      jobs: jobsCount,
+      resumes: resumesCount,
+      candidates: candidatesCount,
+      candidatesApplied: candidatesAppliedCount
+    });
+  } catch (err) {
+    console.error("Error fetching dashboard stats:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+module.exports = router;
+
+backend\routes\jobs.js
+const express = require("express");
+const Job = require("../models/Job");
+const authMiddleware = require("../middleware/authMiddleware");
+
+const router = express.Router();
+
+// Create job
+router.post("/", async (req, res) => {
+  try {
+    const job = new Job(req.body);
+    await job.save();
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// Get all jobs
+router.get("/", async (req, res) => {
+  try {
+    const jobs = await Job.find();
+    res.json(jobs);
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
+
+// Get single job
+router.get("/:id", async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    res.json(job);
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
+
+// Delete job
+router.delete("/:id", async (req, res) => {
+  try {
+    await Job.findByIdAndDelete(req.params.id);
+    res.json({ msg: "Job deleted successfully" });
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
+});
+
+// Update job
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedJob = await Job.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }   // return updated job
+    );
+    if (!updatedJob) {
+      return res.status(404).json({ msg: "Job not found" });
+    }
+    res.json(updatedJob);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+module.exports = router;
+
+backend\routes\resume.js
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const authMiddleware = require("../middleware/authMiddleware");
+const Resume = require("../models/Resume");
+const Job = require("../models/Job");
+const fs = require("fs");
+const { analyzeResume } = require("../utils/aiService");
+
+const router = express.Router();
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/resumes/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+});
+const upload = multer({ storage });
+
+// Ensure uploads folder exists
+const uploadDir = "uploads/resumes";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Get all jobs (for dropdown)
+router.get("/jobs", authMiddleware, async (req, res) => {
+  try {
+    const jobs = await Job.find({}, "_id title");
+    res.json(jobs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+// Upload resume endpoint
+router.post("/upload", authMiddleware, upload.single("resume"), async (req, res) => {
+  try {
+    const { candidateName, jobId } = req.body;
+    if (!candidateName || !jobId) {
+      return res.status(400).json({ msg: "Candidate name and jobId are required" });
+    }
+    if (!req.file) {
+      return res.status(400).json({ msg: "Resume file is required" });
+    }
+
+    const resume = new Resume({
+      candidateName,
+      jobId,
+      uploadedBy: req.user.id,
+      resumeUrl: req.file.path
+    });
+    await resume.save();
+
+    res.json({ msg: "Resume uploaded successfully", _id: resume._id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// GET /api/resumes/all - Get all resumes with job details (candidateName, job title, uploadedAt, resumeUrl)
+router.get("/all", authMiddleware, async (req, res) => {
+  try {
+    // Optional: Check if user role is hr-admin (assuming req.user.role is set by authMiddleware)
+    if (req.user.role !== "hr-admin") {
+      return res.status(403).json({ msg: "Access denied" });
+    }
+
+    const resumes = await Resume.find()
+      .populate("jobId", "title") // populate job title only
+      .select("candidateName jobId uploadedAt resumeUrl")
+      .exec();
+
+    // Format response to include job title directly
+    const formatted = resumes.map(r => ({
+      _id: r._id,
+      candidateName: r.candidateName,
+      jobTitle: r.jobId?.title || "N/A",
+      uploadedAt: r.uploadedAt,
+      resumeUrl: r.resumeUrl
+    }));
+
+    res.json(formatted);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server error");
+  }
+});
+module.exports = router;
+
+backend\utils\aiService.js
+const axios = require("axios");
+const path = require("path");
+const fs = require("fs");
+const pdfParse = require("pdf-parse");
+
+const OPENAI_API_KEY = process.env.MMC_OPENAI_API_KEY;
+const OPENAI_API_URL = process.env.MMC_OPENAI_BASE_URL || 'https://stg1.mmc-dallas-int-non-prod-ingress.mgti.mmc.com/coreapi/openai/v1/deployments/mmc-tech-gpt-4o-mini-128k-2024-07-18/chat/completions';
+
+async function extractTextFromPDF(filePath) {
+  const dataBuffer = fs.readFileSync(filePath);
+  const data = await pdfParse(dataBuffer);
+  return data.text;
+}
+
+function cleanAIResponse(text) {
+  if (!text) return '';
+  return text.replace(/```json|```/g, '').trim();
+}
+
+async function analyzeResume(job, resumePath) {
+  if (!fs.existsSync(resumePath)) {
+    throw new Error(`Resume file not found: ${resumePath}`);
+  }
+
+  const resumeText = await extractTextFromPDF(resumePath);
+
+  const systemPrompt = `You are a HR recruiter expert. Analyze the candidate's resume text and compare it with the job description. 
+Extract candidate name, experience, skills, and provide a relevance score (0-100) indicating how well the resume matches the job description.
+Provide comments/review on the match.
+Respond ONLY with a valid JSON object (no markdown, no extra text) with keys: candidateName, experience, skills (array), relevanceScore, comments.`;
+
+  const userPrompt = `
+Job Title: ${job.title}
+Job Description: ${job.description}
+Preferred Skills: ${job.preferredSkills ? job.preferredSkills.join(', ') : ''}
+Candidate Resume Text: ${resumeText}
+`;
+
+  const response = await axios.post(
+    OPENAI_API_URL,
+    {
+      model: 'gpt-4',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
+      }
+    }
+  );
+
+  const aiContentRaw = response.data?.choices?.[0]?.message?.content || '';
+  const aiContentClean = cleanAIResponse(aiContentRaw);
+
+  let aiResult;
+  try {
+    aiResult = JSON.parse(aiContentClean);
+  } catch (err) {
+    throw new Error(`Invalid JSON response from AI: ${aiContentRaw}`);
+  }
+
+  return aiResult;
+}
+
+async function rankCandidates(job, resumes) {
+  const candidates = [];
+
+  for (const r of resumes) {
+    const resumePath = path.resolve(r.resumeUrl);
+    try {
+      const aiResult = await analyzeResume(job, resumePath);
+
+      candidates.push({
+        candidateName: r.candidateName,
+        experience: aiResult.experience,
+        skills: aiResult.skills,
+        relevanceScore: aiResult.relevanceScore,
+        comments: aiResult.comments,
+        resumeUrl: `${process.env.BASE_URL || 'http://localhost:5000'}/${r.resumeUrl.replace(/\\/g, '/')}`,
+        resumeId: r._id.toString()
+      });
+    } catch (err) {
+      console.warn(`Failed to analyze resume ${r._id}: ${err.message}`);
+    }
+  }
+
+  candidates.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
+
+  return candidates;
+}
+
+module.exports = { analyzeResume, rankCandidates };
+
+
+backend\utils\pdfExport.js
+const PDFDocument = require("pdfkit");
+const fs = require("fs");
+const path = require("path");
+
+// Existing generatePDF function (for single candidate)
+async function generatePDF(resume) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument();
+    const pdfPath = path.join(__dirname, `../uploads/resumes/report-${resume._id}.pdf`);
+    const stream = fs.createWriteStream(pdfPath);
+
+    doc.pipe(stream);
+
+    doc.fontSize(18).text("Candidate Report", { align: "center" });
+    doc.moveDown();
+
+    doc.fontSize(14).text(`Name: ${resume.candidateName || "N/A"}`);
+    doc.text(`Job Applied: ${resume.jobId?.title || "N/A"}`);
+    doc.text(`Experience: ${resume.experience ?? "N/A"} years`);
+    doc.text(`Skills: ${Array.isArray(resume.skills) ? resume.skills.join(", ") : "N/A"}`);
+    doc.text(`Relevance Score: ${resume.relevanceScore ?? "N/A"}`);
+    doc.text(`Comments: ${resume.comments || "N/A"}`);
+
+    doc.end();
+
+    stream.on("finish", () => resolve(pdfPath));
+    stream.on("error", (err) => reject(err));
+  });
+}
+
+// New generateCombinedPDF function (for multiple candidates)
+async function generateCombinedPDF(candidates, job) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 50 });
+    const timestamp = Date.now();
+    const pdfPath = path.join(__dirname, `../uploads/resumes/bestfit_report_${job._id}_${timestamp}.pdf`);
+    const stream = fs.createWriteStream(pdfPath);
+
+    doc.pipe(stream);
+
+    doc.fontSize(20).text(`Best Fit Candidates Report`, { align: "center" });
+    doc.moveDown();
+    doc.fontSize(16).text(`Job Title: ${job.title}`, { align: "center" });
+    doc.moveDown(2);
+
+    candidates.forEach((c, index) => {
+      doc.fontSize(14).fillColor('black').text(`Candidate #${index + 1}`, { underline: true });
+      doc.moveDown(0.5);
+
+      doc.fontSize(12).text(`Name: ${c.candidateName || "N/A"}`);
+      doc.text(`Experience: ${c.experience ?? "N/A"} years`);
+      doc.text(`Skills: ${Array.isArray(c.skills) ? c.skills.join(", ") : "N/A"}`);
+      doc.text(`Relevance Score: ${c.relevanceScore ?? "N/A"}`);
+      doc.text(`Comments: ${c.comments || "N/A"}`);
+      doc.moveDown(1);
+
+      if (index < candidates.length - 1) {
+        doc.moveTo(doc.x, doc.y).lineTo(doc.page.width - doc.page.margins.right, doc.y).stroke();
+        doc.moveDown(1);
+      }
+    });
+
+    doc.end();
+
+    stream.on("finish", () => resolve(pdfPath));
+    stream.on("error", (err) => reject(err));
+  });
+}
+
+module.exports = { generatePDF, generateCombinedPDF };
+
+backend\.env
+MONGO_URI=mongodb://127.0.0.1:27017/projectDB
+MMC_OPENAI_BASE_URL=https://stg1.mmc-dallas-int-non-prod-ingress.mgti.mmc.com/coreapi/openai/v1/deployments/mmc-tech-gpt-4o-mini-128k-2024-07-18/chat/completions
+MMC_OPENAI_API_KEY=**********************************************
+BASE_URL=http://localhost:5000
+
+backend\server.js
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const dotenv = require("dotenv");
+const path = require("path");
+
+dotenv.config();
+
+const authRoutes = require("./routes/auth");
+const jobRoutes = require("./routes/jobs");
+const resumeRoutes = require("./routes/resume");
+const dashboardRoutes = require("./routes/dashboard");
+const aiRoutes = require('./routes/ai');
+const bestfitRoutes = require('./routes/bestfit');
+
+const app = express();
+
+app.use(express.json());
+app.use(cors());
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.error("MongoDB error:", err));
+
+app.use("/api/auth", authRoutes);
+app.use("/api/jobs", jobRoutes);
+app.use("/api/resumes", resumeRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use('/api/ai', aiRoutes);
+app.use('/api/bestfit', bestfitRoutes);
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
