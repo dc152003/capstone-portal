@@ -1,0 +1,36 @@
+Intro
+“Welcome to the Recruitment Agent — a smart hiring platform designed for both candidates and HR administrators. Let’s quickly walk through how it works.”
+
+Candidate Portal
+
+Signup/Login
+“First, let’s step into the candidate’s journey. Candidates can sign up by creating their account with basic details and then log in seamlessly.”
+
+Dashboard Overview
+“Once logged in, the candidate lands on their dashboard, which clearly shows their role and gives easy navigation options.”
+
+Exploring Job Descriptions
+“Here, under ‘Job Descriptions’, candidates can browse all available roles. They can search by title or location, view details like experience required, skills, and education, and even download the JD as a PDF.”
+
+Applying to Jobs
+“Candidates can directly apply by uploading their resume against the job they’re interested in. The system ensures that their application is stored and linked to the correct job.”
+
+HR Admin Portal
+
+Dashboard Overview
+“Now let’s look at the HR Admin’s side. On login, the dashboard displays quick statistics — total job descriptions created, resumes uploaded, registered candidates, and overall applications.”
+
+Create & Manage Job Descriptions
+“HRs can easily create new job postings with all required details, and manage existing ones with edit and delete options — a complete CRUD experience.”
+
+Resume Upload & AI Analysis
+“In the resume upload section, HRs can upload resumes directly against job descriptions. What’s powerful here is the built-in AI scoring — the system analyzes resumes, assigns relevance scores, highlights skills and experience, and even allows HRs to export a detailed report as a PDF.”
+
+Viewing Resumes
+“All uploaded resumes are stored and easily accessible under the ‘View Resumes’ section. HRs can search, filter, and open resumes in just one click.”
+
+Best Fit Candidate Recommendations
+“And finally, one of the most impactful features — the ‘Best Fit Candidate’ recommendations. Based on a selected job description, the system recommends the top candidates that align most closely with the role, saving time and effort in shortlisting.”
+
+Closing
+“In summary, Recruitment Agent creates a smooth experience for candidates to apply and a powerful toolkit for HRs to manage jobs, analyze resumes with AI, and select the best talent. It’s a seamless bridge between candidates and recruiters, making hiring smarter and faster.”
